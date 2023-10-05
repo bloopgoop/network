@@ -1,0 +1,42 @@
+body {
+    background-color: #aaa8a8;
+}
+
+textarea {
+    max-height: 200px;
+    resize: none;
+}
+
+.posts {
+    list-style-type: none;
+    padding: 0;
+}
+
+.post-container {
+    margin: auto;
+    display: block;
+    background-color: #f8f9fa;
+    width: 70%;
+    height: auto;
+    padding: 20px 30px;
+    margin-bottom: 10px;
+}
+
+.posts li {
+    margin: 10px 0;
+}
+
+.post-content {
+    padding: 6px 12px;
+    margin-bottom: 10px;
+}
+
+.split-container {
+    margin: auto;
+    display: flex;
+    width: 70%;
+    height: auto;
+    padding: 10px 5px;
+    justify-content: space-between;
+    overflow: hidden;
+}

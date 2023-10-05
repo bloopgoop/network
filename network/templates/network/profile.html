@@ -1,0 +1,56 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="post-container rounded border border-secondary" style="min-height: 400px; margin-top: 10px;">
+        <input type="hidden" id="username" value="{{ profile.username }}">
+        <h1 style="text-align: center;">{{ profile }}</h1>
+
+        <div class="border rounded post-container" style="margin-top: 20px; min-height: 200px; width: 90%;">
+            bio
+        </div>
+
+        <div class="split-container" style="width: 90%;">
+            <div>
+                <span>Following: <span id="following">{{ following }}</span></span>    
+                <span>Followers: <span id="followers">{{ followers }}</span></span>
+            </div>
+            
+            <div>
+                {% if user.is_authenticated and profile != user%}
+                    <button id="follow" class="btn btn-outline-primary">Follow</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <ul class="posts">
+        {% for post in posts %}
+        <li>
+            <container class="border rounded post-container">
+                <h3>{{ profile }}</h3>
+
+                <div class="form-group post-content border">
+                    {{ post.content }}
+                </div>
+
+                <div class="split-container" style="width: 100%;">
+                    <div>Likes: {{ post.likes.count }}</div>
+                    <div>Posted on: {{ post.date }}</div>
+                </div>
+            </container>
+        </li>
+        {% empty %}
+            <li>
+                No posts from this user
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}

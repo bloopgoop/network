@@ -1,0 +1,57 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <!--Hidden input to pass username to js files-->
+    <input type="hidden" id="username" value="{{ user.username }}">
+
+
+    <!--Radio button to toggle betwewen All View and Following View-->
+    <div class="split-container" style="margin-top: 10px; color: #004b9b;">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary active">
+              <input type="radio" name="options" id="allposts" autocomplete="off" checked> All Posts
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="following" autocomplete="off"> Following
+            </label>
+        </div>
+
+        <div id="page" style="margin-top: auto;">All Posts</div>
+    </div>
+
+    <!--Feed-->
+    <ul class="posts">
+        {% if user.is_authenticated %}
+            <li>
+                <container class="border rounded post-container">
+
+                    <h4>New post</h4>
+                    <form id="create-post" action="{% url 'index' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">{{ form }}</div>
+                        <input id="submit-post" class="btn btn-outline-primary" type="submit" value="Post">
+                    </form>  
+                
+                </container>
+            </li>
+        {% endif %}
+
+        <div id="all-view"></div>
+
+        <div id="following-view"></div>
+
+    </ul>
+
+    <!--Buttons-->
+    <div class="split-container">
+        <button id="previous" class="btn btn-primary" style="display: none;">Previous</button>
+        <button id="next" class="btn btn-primary" style="display: none; margin-left: auto;">Next</button>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
