@@ -1,4 +1,5 @@
 import time
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -7,6 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Follow, Post, Like
 from .forms import NewPostForm
@@ -17,6 +19,7 @@ def index(request):
     if request.method == "POST":
         form = NewPostForm(request.POST)
         if form.is_valid():
+            print(request.user)
 
             # Process data
             creator = User.objects.get(username=request.user)
@@ -113,13 +116,17 @@ def posts(request):
 
     # Return posts in reverse chronological order
     posts = posts.order_by("-date")[start:end]
-    return JsonResponse({"posts": [post.serialize() for post in posts]}, safe=False)
+    return JsonResponse({
+        "loggedin": True,
+        "posts": [post.serialize() for post in posts]
+        }, 
+        safe=False)
     
 
 def profile(request, username):
     profileUser = User.objects.get(username=username)
-    following = Follow.objects.filter(follower=profileUser).count
-    followers = Follow.objects.filter(user=profileUser).count
+    following = Follow.objects.filter(follower=profileUser).count()
+    followers = Follow.objects.filter(user=profileUser).count()
     posts = Post.objects.filter(creator=profileUser)
     posts = posts.order_by("-date")
 
@@ -163,3 +170,23 @@ def follow(request):
         return JsonResponse({"OK": 200})
 
 
+@csrf_exempt
+@login_required
+def edit(request, postID):
+
+    if request.method != "PUT":
+        return JsonResponse({"error": "Request not PUT"})
+
+    try:
+        post = Post.objects.get(id=postID)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
+    if request.user != post.creator:
+        return JsonResponse({"error": "You do not have permission to edit this post"})
+    
+    data = json.loads(request.body)
+    if data.get("content") is not None:
+        post.content = data.get("content")
+    post.save()
+    return JsonResponse({"code": 204})

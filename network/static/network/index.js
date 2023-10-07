@@ -12,46 +12,46 @@ var containers;
 const quantity = 10;
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const username = document.querySelector('#username').value;
-    changeView('all');
+    const username = document.querySelector("#username").value;
+    changeView("all");
     getPosts(numPosts, numPosts + quantity, view, username);
 
     // Load more posts when scrolled down to bottom of page
-    let isFetching = false;
+    var isFetching = false;
     window.onscroll = () => {
-        console.log(isFetching)
+        console.log(isFetching);
         if (!isFetching && window.innerHeight + window.scrollY >= document.body.offsetHeight - 1) {
              isFetching = true;
             getPosts(numPosts, numPosts + quantity, view, username)
                 .then(() => {
                     isFetching = false;
                 });
-        };
+        }
     };
 
     // All Posts button function
-    document.querySelector('#allposts').addEventListener('click', () => {
-        document.querySelector('#allposts').parentElement.classList.add('active');
-        document.querySelector('#following').parentElement.classList.remove('active');
-        changeView('all');
+    document.querySelector("#allposts").addEventListener("click", () => {
+        document.querySelector("#allposts").parentElement.classList.add("active");
+        document.querySelector("#following").parentElement.classList.remove("active");
+        changeView("all");
         isFetching = false;
-        document.querySelector('#page').innerHTML = 'All Posts';
+        document.querySelector("#page").innerHTML = "All Posts";
     });
 
     // Following button function
-    document.querySelector('#following').addEventListener('click', () => {
-        document.querySelector('#allposts').parentElement.classList.remove('active');
-        document.querySelector('#following').parentElement.classList.add('active');
-        changeView('following');
+    document.querySelector("#following").addEventListener("click", () => {
+        document.querySelector("#allposts").parentElement.classList.remove("active");
+        document.querySelector("#following").parentElement.classList.add("active");
+        changeView("following");
         isFetching = false;
-        document.querySelector('#page').innerHTML = 'Following';
+        document.querySelector("#page").innerHTML = "Following";
 
         // If view is initally empty, load posts
-        if (view.innerHTML === '') {
+        if (view.innerHTML === "") {
             getPosts(numPosts, numPosts + quantity, view);
-        };
+        }
     });
 
 
@@ -61,95 +61,124 @@ document.addEventListener('DOMContentLoaded', () => {
 // Add a new post with given contents to DOM
 function add_post(contents, parent, username) {
 
+    console.log(contents)
     // Create container
-    const container = document.createElement('container');
-    container.classList.add('border', 'rounded', 'post-container');
+    const container = document.createElement("container");
+    container.classList.add("border", "rounded", "post-container");
 
     // Username
-    const creator = document.createElement('h3');
-    const link = document.createElement('a');
+    const creator = document.createElement("h3");
+    const link = document.createElement("a");
     link.href = `/profile/${contents.creator}`;
     link.innerHTML = contents.creator;
     creator.appendChild(link);
 
     // Username and edit button container
-    const topContainer = document.createElement('div');
-    topContainer.classList.add('split-container');
-    topContainer.style.width = '100%';
+    const topContainer = document.createElement("div");
+    topContainer.classList.add("full-split-container");
     topContainer.appendChild(creator);
 
     // Body
-    const body = document.createElement('div');
-    body.classList.add('form-group', 'post-content', 'border');
+    const body = document.createElement("div");
+    body.classList.add("form-group", "post-content", "border");
     body.innerHTML = contents.content;
 
     // Likes
-    const likes = document.createElement('div');
+    const likes = document.createElement("div");
     likes.innerHTML = `Likes: ${contents.likes}`;
 
     // Date
-    const date = document.createElement('div');
+    const date = document.createElement("div");
     date.innerHTML= `${contents.date}`;
 
     // Likes and date container
-    const statsContainer = document.createElement('div');
-    statsContainer.classList.add('split-container');
-    statsContainer.style.width = '100%';
+    const statsContainer = document.createElement("div");
+    statsContainer.classList.add("full-split-container");
     statsContainer.appendChild(likes);
     statsContainer.appendChild(date);
 
-    // Add edit button to the top container if the creator of the post is the current user (client side verification)
+    // Add edit button to the top container (client side verification which may fail)
     if (contents.creator === username) {
 
-        originalPost = body.innerHTML;
+        let originalPost = body.innerHTML;
 
         function createEditButton() {
 
-            const edit = document.createElement('button');
-            edit.classList.add('btn', 'btn-primary');
-            edit.innerHTML = 'Edit';
-            edit.addEventListener('click', () => {
+            const editBtn = document.createElement("button");
+            editBtn.classList.add("btn", "btn-primary");
+            editBtn.innerHTML = "Edit";
+            editBtn.addEventListener("click", () => {
 
-                // Change original post to text form
-                body.classList.remove('post-content', 'border')
-                body.innerHTML = '';
-                const textForm = document.createElement('textarea');
-                textForm.classList.add('form-control');
+                // Change original post to text form with cancel save btns
+                body.classList.remove("post-content", "border");
+                body.innerHTML = "";
+                const textForm = document.createElement("textarea");
+                textForm.classList.add("form-control");
                 textForm.value = originalPost;
                 body.appendChild(textForm);
-
-                // Change buttons to cancel and save
-                createCancelAndSaveButtons(edit)
+                editBtn.remove();
+                createCancelAndSaveButtons();
 
             });
-            return edit
+            topContainer.appendChild(editBtn)
         }
 
-        function createCancelAndSaveButtons(edit) {
-            edit.remove()
-            const group = document.createElement('div');
+        function createCancelAndSaveButtons() {
+            const group = document.createElement("div");
 
             // Cancel button
-            const cancel = document.createElement('button');
-            cancel.classList.add('btn', 'btn-primary');
-            cancel.innerHTML = 'Cancel';
-            cancel.addEventListener('click', () => {
+            const cancelBtn = document.createElement("button");
+            cancelBtn.classList.add("btn", "btn-primary");
+            cancelBtn.innerHTML = "Cancel";
+            cancelBtn.addEventListener("click", () => {
 
-                // Change textform to original post
-                body.classList.add('post-content', 'border')
+                // Change textform to original post with edit btn
+                body.classList.add("post-content", "border");
                 body.innerHTML = originalPost;
-                group.remove()
-                edit = createEditButton()
-                topContainer.appendChild(edit)
+                group.remove();
+                createEditButton();
+
             });
-            group.appendChild(cancel);
+            group.appendChild(cancelBtn);
+
+            // Save button
+            const saveBtn = document.createElement("button");
+            saveBtn.classList.add("btn", "btn-primary");
+            saveBtn.style.marginLeft = '10px';
+            saveBtn.innerHTML = "Save";
+            saveBtn.addEventListener("click", () => {
+
+                fetch(`/edit/${contents.id}`, {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        content: body.firstElementChild.value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+
+                    if (data.code === 204) {
+
+                        // Change textform to original post with edit btn
+                        body.classList.add("post-content", "border");
+                        body.innerHTML = body.firstElementChild.value;
+                        group.remove();
+                        createEditButton();
+                        alert("Post successfully edited")
+
+                    } else {
+                        alert(`Error in changing post, ${data.error}`)
+                    }
+            
+                });
+
+            });
+            group.appendChild(saveBtn);
             topContainer.appendChild(group);
         }
 
-        editBtn = createEditButton();
-        topContainer.appendChild(editBtn);
-
-    };
+        createEditButton();
+    }
 
     // Add components to the post container
     container.appendChild(topContainer);
@@ -164,21 +193,21 @@ function add_post(contents, parent, username) {
 
 // Function that changes all the global variables that is used to display posts to the user
 function changeView(filter) {
-    if (filter === 'all') {
+    if (filter === "all") {
 
-        view = document.querySelector('#all-view');
-        containers = view.getElementsByTagName('container');
+        view = document.querySelector("#all-view");
+        containers = view.getElementsByTagName("container");
         numPosts = numAllPosts;
-        view.style.display = 'block';
-        document.querySelector('#following-view').style.display = 'none';
+        view.style.display = "block";
+        document.querySelector("#following-view").style.display = "none";
 
     } else {
 
-        view = document.querySelector('#following-view');
-        containers = view.getElementsByTagName('container');
+        view = document.querySelector("#following-view");
+        containers = view.getElementsByTagName("container");
         numPosts = numFollowingPosts;
-        view.style.display = 'block';
-        document.querySelector('#all-view').style.display = 'none';
+        view.style.display = "block";
+        document.querySelector("#all-view").style.display = "none";
 
     };
 };
@@ -196,14 +225,14 @@ function getPosts(start, end, view, username) {
             .then(response => response.json())
             .then(data => {
                 
-                // If user not logged in, API will send "loggedin": False so return
+                // If user not logged in
                 if (data.loggedin === false) {
-                    alert('You must be logged in to use this feature');
+                    alert("You must be logged in to use this feature");
                     return;
                 }
 
                 // Update corresponding number of total posts in the view
-                if (view.id === 'all-view'){
+                if (view.id === "all-view"){
                     numAllPosts += data.posts.length;
                     numPosts = numAllPosts;
                 } else {
@@ -213,7 +242,7 @@ function getPosts(start, end, view, username) {
 
                 // Populate view with posts
                 if (data.posts.length == 0) {
-                    console.log('No more posts')
+                    alert("No more posts")
                     return;
                 }
                 for (let i = 0; i < data.posts.length; i++) {
