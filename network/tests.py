@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 
 from .models import User, Follow, Post, Like
 
@@ -68,3 +68,29 @@ class LikeTestCase(TestCase):
         self.assertTrue(a.is_valid_like())
         self.assertEqual(a.post.likes.count(), 1)
 
+class IndexTestCase(TestCase):
+
+    def test_get_index(self):
+        c = Client()
+        response = c.get("/")
+        self.assertEqual(response.status_code, 200)
+
+class ProfileTestCase(TestCase):
+
+    def setUp(self):
+        #Create users
+        user1 = User.objects.create(username="AAA")
+        user2 = User.objects.create(username="BBB")
+
+        #Create follows
+        follow1 = Follow.objects.create(user=user1, follower=user2)
+
+    def test_profile(self):
+        c = Client()
+        response = c.get("/profile/AAA")
+        self.assertEqual(response.status_code, 200)
+
+    def test_follow(self):
+        c = Client()
+        response = c.get("/profile/AAA")
+        self.assertEqual(response.context["followers"], 1)

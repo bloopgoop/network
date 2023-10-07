@@ -40,3 +40,13 @@ textarea {
     justify-content: space-between;
     overflow: hidden;
 }
+
+.full-split-container {
+    margin: auto;
+    display: flex;
+    width: 100%;
+    height: auto;
+    padding: 10px 5px;
+    justify-content: space-between;
+    overflow: hidden;
+}
