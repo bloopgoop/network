@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 
 from .models import User, Follow, Post, Like
 
-# Create your tests here.
+# Database tests
 class FollowTestCase(TestCase):
 
     def setUp(self):
@@ -68,6 +68,9 @@ class LikeTestCase(TestCase):
         self.assertTrue(a.is_valid_like())
         self.assertEqual(a.post.likes.count(), 1)
 
+
+# Client testing used to see if certain pages loaded correctly
+# & see if template is passed correct data
 class IndexTestCase(TestCase):
 
     def test_get_index(self):
