@@ -61,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Add a new post with given contents to DOM
 function add_post(contents, parent, username) {
 
-    console.log(contents)
     // Create container
     const container = document.createElement("container");
     container.classList.add("border", "rounded", "post-container");
@@ -81,11 +80,11 @@ function add_post(contents, parent, username) {
     // Body
     const body = document.createElement("div");
     body.classList.add("form-group", "post-content", "border");
+    body.style.whiteSpace = "pre-wrap";
     body.innerHTML = contents.content;
 
     // Likes
-    const likes = document.createElement("div");
-    likes.innerHTML = `Likes: ${contents.likes}`;
+    const likes = createLikeButton(contents);
 
     // Date
     const date = document.createElement("div");
@@ -97,7 +96,7 @@ function add_post(contents, parent, username) {
     statsContainer.appendChild(likes);
     statsContainer.appendChild(date);
 
-    // Add edit button to the top container (client side verification which may fail)
+    // Add edit button to the top container (client side)
     if (contents.creator === username) {
 
         let originalPost = body.innerHTML;
@@ -111,6 +110,7 @@ function add_post(contents, parent, username) {
 
                 // Change original post to text form with cancel save btns
                 body.classList.remove("post-content", "border");
+                originalPost = body.innerHTML;
                 body.innerHTML = "";
                 const textForm = document.createElement("textarea");
                 textForm.classList.add("form-control");
@@ -154,26 +154,23 @@ function add_post(contents, parent, username) {
                         content: body.firstElementChild.value
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-
-                    if (data.code === 204) {
-
+                .then(response => {
+                    
+                    if (response.status === 201) {
                         // Change textform to original post with edit btn
                         body.classList.add("post-content", "border");
                         body.innerHTML = body.firstElementChild.value;
+                        originalPost = body.innerHTML;
                         group.remove();
                         createEditButton();
-                        alert("Post successfully edited")
-
+                        return;
                     } else {
-                        alert(`Error in changing post, ${data.error}`)
+                        alert(`Error in changing post, ${response.json().error}`)
+                        return;
                     }
-            
-                });
-
+                })
             });
-            group.appendChild(saveBtn);
+            group.appendChild(saveBtn); 
             topContainer.appendChild(group);
         }
 
@@ -214,11 +211,6 @@ function changeView(filter) {
 
 
 function getPosts(start, end, view, username) {
-    /* 
-    Calls the posts function in views.py.
-    inputs are integers start and end which signify which slice of posts to get
-    bool following which signifies whether or not we want to get following only posts
-    */
 
     return new Promise((resolve, reject) => {
         fetch(`/posts?start=${start}&end=${end}&view=${view.id}`)
@@ -227,7 +219,12 @@ function getPosts(start, end, view, username) {
                 
                 // If user not logged in
                 if (data.loggedin === false) {
-                    alert("You must be logged in to use this feature");
+                    if (view.innerHTML === "") {
+                        const text = document.createElement("h2");
+                        text.classList.add("post-container", "border", "rounded");
+                        text.innerHTML = "You must be logged in to use this feature";
+                        view.appendChild(text);
+                    }
                     return;
                 }
 
@@ -254,3 +251,81 @@ function getPosts(start, end, view, username) {
             });
     });
 };
+
+
+function createLikeButton(contents) {
+
+    const likes = document.createElement("div");
+    const likeBtn = document.createElement("span");
+    likeBtn.classList.add("heart")
+
+    const likeCount = document.createElement("span");
+    likeCount.innerHTML = contents.likes;
+
+    emptyHeart = `<?xml version="1.0" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+        "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+        width="15pt" height="15pt" viewBox="0 0 45.000000 45.000000"
+        preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,45.000000) scale(0.100000,-0.100000)"
+    fill="#2596be" stroke="none">
+    <path d="M83 390 c-57 -38 -66 -116 -23 -200 21 -42 93 -111 140 -135 31 -16
+    36 -16 67 -1 86 41 173 158 173 234 0 103 -113 158 -180 87 l-24 -25 -26 25
+    c-37 36 -87 41 -127 15z m108 -70 c21 -22 41 -40 44 -40 3 0 23 18 44 40 43
+    45 62 49 91 20 40 -40 13 -128 -58 -192 -66 -60 -74 -62 -118 -29 -54 39 -80
+    70 -99 113 -20 50 -19 70 6 102 28 36 46 33 90 -14z"/>
+    </g>
+    </svg>
+    `;
+    filledHeart = `<?xml version="1.0" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+        "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+        width="15pt" height="15pt" viewBox="0 0 45.000000 45.000000"
+        preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,45.000000) scale(0.100000,-0.100000)"
+    fill="#2596be" stroke="none">
+    <path d="M83 390 c-57 -38 -66 -116 -23 -200 21 -42 93 -111 140 -135 31 -16
+    36 -16 67 -1 86 41 173 158 173 234 0 103 -113 158 -180 87 l-24 -25 -26 25
+    c-37 36 -87 41 -127 15z"/>
+    </g>
+    </svg>
+    `;
+    if (contents.liked) {
+        likeBtn.innerHTML = filledHeart;
+    } else {
+        likeBtn.innerHTML = emptyHeart;
+    }
+    likeBtn.addEventListener('click', () => {
+
+        fetch(`/like/${contents.id}`, {
+            method: "PUT"
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Request failed with status: ${response.status}`);
+            }
+            
+            // Like was removed
+            if (response.status === 204) {
+                likeBtn.innerHTML = emptyHeart;
+                var count = likeCount.innerHTML;
+                count--;
+                likeCount.innerHTML = count;
+            }
+
+            // Like was added
+            if (response.status === 201) {
+                likeBtn.innerHTML = filledHeart;
+                var count = likeCount.innerHTML;
+                count++;
+                likeCount.innerHTML = count;
+            }
+        });
+    });
+    likes.appendChild(likeBtn);
+    likes.appendChild(likeCount);
+
+    return likes
+}

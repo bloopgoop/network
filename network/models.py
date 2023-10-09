@@ -34,7 +34,8 @@ class Post(models.Model):
             "creator": self.creator.username,
             "content": self.content,
             "date": self.date.strftime("%a %d %b %Y %I:%M %p"),
-            "likes": self.likes.count()
+            "likes": self.likes.count(),
+            "liked": False
         }
 
     def is_valid_post(self):

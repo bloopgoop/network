@@ -3,7 +3,7 @@ body {
 }
 
 textarea {
-    max-height: 200px;
+    min-height: 200px;
     resize: none;
 }
 
@@ -49,4 +49,10 @@ textarea {
     padding: 10px 5px;
     justify-content: space-between;
     overflow: hidden;
+}
+
+.heart {
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
 }

@@ -1,0 +1,2 @@
+edit view is creating new posts
+when trying to change the same post twice, the body becomes nothing
